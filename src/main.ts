@@ -107,7 +107,7 @@ async function run(): Promise<void> {
     if (!inputs.token) {
       throw new Error(`Missing required input 'token'.`)
     }
-    
+
     const githubHelper = new GitHubHelper(inputs.token)
     const githubHelperReaction = new GitHubHelper(inputs.reactionToken)
 
@@ -140,7 +140,8 @@ async function run(): Promise<void> {
     }
 
     // Determined that the command should be dispatched
-    core.info(`Command '${commandTokens[0]}' to be dispatched.`)
+    core.info(`Command '${commandTokens[0]}' to be dispatched SDJFLKDJ`)
+    core.info('TEST')
     core.info('TEST')
     // Define payload
     const clientPayload: ClientPayload = {
