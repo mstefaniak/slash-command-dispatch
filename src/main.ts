@@ -141,7 +141,7 @@ async function run(): Promise<void> {
 
     // Determined that the command should be dispatched
     core.info(`Command '${commandTokens[0]}' to be dispatched.`)
-
+    core.info('TEST')
     // Define payload
     const clientPayload: ClientPayload = {
       github: github.context
