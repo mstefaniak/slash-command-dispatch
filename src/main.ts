@@ -33,16 +33,11 @@ async function run(): Promise<void> {
 
     // Get action inputs
     const inputs = getInputs()
-    core.debug(`Inputs: ${inspect(inputs)}`)
-
-    // Check required inputs
-    if (!inputs.token) {
-      throw new Error(`Missing required input 'token'.`)
-    }
+    core.info(`Inputs: ${inspect(inputs)}`)
 
     // Get configuration for registered commands
     const config = getCommandsConfig(inputs)
-    core.debug(`Commands config: ${inspect(config)}`)
+    core.info(`Commands config: ${inspect(config)}`)
 
     // Check the config is valid
     if (!configIsValid(config)) return
@@ -50,8 +45,8 @@ async function run(): Promise<void> {
     // Get the comment body and id
     const commentBody: string = github.context.payload.comment.body
     const commentId: number = github.context.payload.comment.id
-    core.debug(`Comment body: ${commentBody}`)
-    core.debug(`Comment id: ${commentId}`)
+    core.info(`Comment body: ${commentBody}`)
+    core.info(`Comment id: ${commentId}`)
 
     // Check if the first line of the comment is a slash command
     const firstLine = commentBody.split(/\r?\n/)[0].trim()
@@ -64,13 +59,13 @@ async function run(): Promise<void> {
 
     // Tokenise the first line (minus the leading slash)
     const commandTokens = tokeniseCommand(firstLine.slice(1))
-    core.debug(`Command tokens: ${inspect(commandTokens)}`)
+    core.info(`Command tokens: ${inspect(commandTokens)}`)
 
     // Check if the command is registered for dispatch
     let configMatches = config.filter(function (cmd) {
       return cmd.command == commandTokens[0]
     })
-    core.debug(`Config matches on 'command': ${inspect(configMatches)}`)
+    core.info(`Config matches on 'command': ${inspect(configMatches)}`)
     if (configMatches.length == 0) {
       core.info(`Command '${commandTokens[0]}' is not registered for dispatch.`)
       return
@@ -85,7 +80,7 @@ async function run(): Promise<void> {
         (cmd.issue_type == 'pull-request' && isPullRequest)
       )
     })
-    core.debug(`Config matches on 'issue_type': ${inspect(configMatches)}`)
+    core.info(`Config matches on 'issue_type': ${inspect(configMatches)}`)
     if (configMatches.length == 0) {
       const issueType = isPullRequest ? 'pull request' : 'issue'
       core.info(
@@ -99,7 +94,7 @@ async function run(): Promise<void> {
       configMatches = configMatches.filter(function (cmd) {
         return cmd.allow_edits
       })
-      core.debug(`Config matches on 'allow_edits': ${inspect(configMatches)}`)
+      core.info(`Config matches on 'allow_edits': ${inspect(configMatches)}`)
       if (configMatches.length == 0) {
         core.info(
           `Command '${commandTokens[0]}' is not configured to allow edits.`
@@ -109,6 +104,10 @@ async function run(): Promise<void> {
     }
 
     // Create github clients
+    if (!inputs.token) {
+      throw new Error(`Missing required input 'token'.`)
+    }
+    
     const githubHelper = new GitHubHelper(inputs.token)
     const githubHelperReaction = new GitHubHelper(inputs.reactionToken)
 
@@ -126,13 +125,13 @@ async function run(): Promise<void> {
       github.context.repo,
       github.context.actor
     )
-    core.debug(`Actor permission: ${actorPermission}`)
+    core.info(`Actor permission: ${actorPermission}`)
 
     // Filter matching commands by the user's permission level
     configMatches = configMatches.filter(function (cmd) {
       return actorHasPermission(actorPermission, cmd.permission)
     })
-    core.debug(`Config matches on 'permission': ${inspect(configMatches)}`)
+    core.info(`Config matches on 'permission': ${inspect(configMatches)}`)
     if (configMatches.length == 0) {
       core.info(
         `Command '${commandTokens[0]}' is not configured for the user's permission level '${actorPermission}'.`
@@ -176,7 +175,7 @@ async function run(): Promise<void> {
         commandTokens,
         cmd.static_args
       )
-      core.debug(
+      core.info(
         `Slash command payload: ${inspect(clientPayload.slash_command)}`
       )
       // Dispatch the command
@@ -191,7 +190,7 @@ async function run(): Promise<void> {
         'rocket'
       )
   } catch (error) {
-    core.debug(inspect(error))
+    core.info(inspect(error))
     const message: string = utils.getErrorMessage(error)
     // Handle validation errors from workflow dispatch
     if (
